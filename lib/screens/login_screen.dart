@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/entities.dart';
 import '../widgets/futuristic.dart';
 
@@ -11,25 +12,38 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final email = TextEditingController(text: 'owner@roadsidex.local');
-  final password = TextEditingController(text: 'RoadsideX123');
+  final email = TextEditingController();
+  final password = TextEditingController();
+
   UserRole role = UserRole.owner;
   bool obscure = true;
 
-  void submit() {
-    if (email.text.trim().isEmpty || password.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter an email and password.')),
-      );
-      return;
-    }
-    final name = role == UserRole.technician
-        ? 'Carlos Rivera'
-        : role == UserRole.dispatcher
-        ? 'Roadside X Dispatcher'
-        : 'Jontarius Cooper';
-    widget.onLogin(role, name);
+  Future<void> submit() async {
+  if (email.text.trim().isEmpty || password.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Enter an email and password.')),
+    );
+    return;
   }
+
+  try {
+    final response = await Supabase.instance.client.auth.signInWithPassword(
+      email: email.text.trim(),
+      password: password.text,
+    );
+
+    if (response.user != null) {
+      widget.onLogin(role, response.user!.email ?? 'User');
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.toString())),
+    );
+  }
+}
+  
 
   @override
   Widget build(BuildContext context) {
