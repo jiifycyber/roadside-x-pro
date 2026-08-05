@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:passkeys/authenticator.dart';
+
 import '../models/entities.dart';
 import '../widgets/futuristic.dart';
 
@@ -44,6 +46,34 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
   
+Future<void> signInWithPasskey() async {
+  try {
+    final authenticator = PasskeyAuthenticator();
+
+    final response =
+        await Supabase.instance.client.auth.signInWithPasskey(
+      authenticator,
+    );
+
+    if (!mounted) return;
+
+    if (response.user != null) {
+      widget.onLogin(
+        role,
+        response.user!.email ?? 'User',
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Face ID sign-in failed: $e'),
+      ),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +202,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: Icons.login,
                         onPressed: submit,
                       ),
+
+const SizedBox(height: 12),
+
+NeonButton(
+  label: 'SIGN IN WITH FACE ID',
+  icon: Icons.face,
+  onPressed: signInWithPasskey,
+),
                       const SizedBox(height: 17),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
