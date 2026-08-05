@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:passkeys/authenticator.dart';
+
 import '../models/entities.dart';
 import '../state/app_state.dart';
 import '../widgets/common.dart';
@@ -53,6 +56,34 @@ class Phase4Shell extends StatefulWidget {
 }
 
 class _Phase4ShellState extends State<Phase4Shell> {
+Future<void> registerPasskey() async {
+  try {
+    final authenticator = PasskeyAuthenticator();
+
+    await Supabase.instance.client.auth.registerPasskey(
+      authenticator,
+      friendlyName: 'Jontarius iPhone',
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Face ID setup completed successfully.'),
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Face ID setup failed: $e'),
+      ),
+    );
+  }
+}
+
+
   int page = 0;
   final menu = const [
     ('Dashboard', Icons.dashboard_rounded),
@@ -220,6 +251,22 @@ class _Phase4ShellState extends State<Phase4Shell> {
             ),
             subtitle: Text(_roleLabel(widget.role)),
           ),
+ListTile(
+  leading: const Icon(
+    Icons.face_retouching_natural,
+    color: Color(0xFF00E5FF),
+  ),
+  title: const Text(
+    'Set Up Face ID',
+    style: TextStyle(fontWeight: FontWeight.w800),
+  ),
+  onTap: () async {
+    if (close) Navigator.pop(context);
+    await registerPasskey();
+  },
+),
+
+
           ListTile(
             leading: const Icon(Icons.logout, color: Color(0xFFFF6B8A)),
             title: const Text(
@@ -1100,7 +1147,7 @@ class _Phase4ShellState extends State<Phase4Shell> {
   Widget _settings() => _page(
     'System Settings',
     'Company identity, security, integrations, backups, and automation.',
-    const Column(
+     Column(
       children: [
         SectionCard(
           child: Column(
