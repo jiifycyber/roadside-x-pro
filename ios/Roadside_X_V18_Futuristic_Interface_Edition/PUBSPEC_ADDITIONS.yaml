@@ -1,0 +1,15 @@
+# Add under dependencies in pubspec.yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_map: ^8.2.1
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+  http: ^1.4.0
+  url_launcher: ^6.3.2
+  shared_preferences: ^2.5.3
+  intl: ^0.20.2
+
+# Optional modules for the next connection step:
+# firebase_core, firebase_auth, cloud_firestore, firebase_storage,
+# firebase_messaging, printing, pdf, image_picker, signature, connectivity_plus
