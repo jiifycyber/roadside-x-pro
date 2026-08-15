@@ -21,59 +21,52 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscure = true;
 
   Future<void> submit() async {
-  if (email.text.trim().isEmpty || password.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Enter an email and password.')),
-    );
-    return;
-  }
-
-  try {
-    final response = await Supabase.instance.client.auth.signInWithPassword(
-      email: email.text.trim(),
-      password: password.text,
-    );
-
-    if (response.user != null) {
-      widget.onLogin(role, response.user!.email ?? 'User');
-    }
-  } catch (e) {
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.toString())),
-    );
-  }
-}
-  
-Future<void> signInWithPasskey() async {
-  try {
-    final authenticator = PasskeyAuthenticator();
-
-    final response =
-        await Supabase.instance.client.auth.signInWithPasskey(
-      authenticator,
-    );
-
-    if (!mounted) return;
-
-    if (response.user != null) {
-      widget.onLogin(
-        role,
-        response.user!.email ?? 'User',
+    if (email.text.trim().isEmpty || password.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter an email and password.')),
       );
+      return;
     }
-  } catch (e) {
-    if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Face ID sign-in failed: $e'),
-      ),
-    );
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email.text.trim(),
+        password: password.text,
+      );
+
+      if (response.user != null) {
+        widget.onLogin(role, response.user!.email ?? 'User');
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
-}
 
+  Future<void> signInWithPasskey() async {
+    try {
+      final authenticator = PasskeyAuthenticator();
+
+      final response = await Supabase.instance.client.auth.signInWithPasskey(
+        authenticator,
+      );
+
+      if (!mounted) return;
+
+      if (response.user != null) {
+        widget.onLogin(role, response.user!.email ?? 'User');
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Face ID sign-in failed: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,16 +115,19 @@ Future<void> signInWithPasskey() async {
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.car_repair,
-                            size: 42,
-                            color: Colors.white,
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/jiffy-logo.png',
+                              width: 110,
+                              height: 110,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 22),
                       const Text(
-                        'ROADSIDE X PRO',
+                        'JIFFY ROADSIDE ASSISTANCE CORPORATION',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 34,
@@ -173,7 +169,7 @@ Future<void> signInWithPasskey() async {
                       ),
                       const SizedBox(height: 15),
                       DropdownButtonFormField<UserRole>(
-                        value: role,
+                        initialValue: role,
                         decoration: const InputDecoration(
                           labelText: 'Access Level',
                           prefixIcon: Icon(Icons.badge_outlined),
@@ -203,13 +199,13 @@ Future<void> signInWithPasskey() async {
                         onPressed: submit,
                       ),
 
-const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-NeonButton(
-  label: 'SIGN IN WITH FACE ID',
-  icon: Icons.face,
-  onPressed: signInWithPasskey,
-),
+                      NeonButton(
+                        label: 'SIGN IN WITH FACE ID',
+                        icon: Icons.face,
+                        onPressed: signInWithPasskey,
+                      ),
                       const SizedBox(height: 17),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
